@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ededed" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#111111" media="(prefers-color-scheme: dark)">
+<meta name="color-scheme" content="light dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Chat">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Chat</title>
+<style>
+:root{--bg:#ededed;--bar:#f7f7f7;--line:#d6d6d6;--tx:#111;--sub:#a0a0a0;--in:#fff;--them:#fff;--me:#95ec69;--ic:#222;--ph:#9a9a9a}
+@media(prefers-color-scheme:dark){:root{--bg:#111;--bar:#1c1c1c;--line:#262626;--tx:#d9d9d9;--sub:#6b6b6b;--in:#2c2c2c;--them:#2c2c2c;--me:#26b35d;--ic:#d8d8d8;--ph:#6b6b6b}}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{display:flex;flex-direction:column;height:100dvh;background:var(--bg);color:var(--tx);font:16px/1.4 -apple-system,"Segoe UI",Roboto,sans-serif;padding-top:env(safe-area-inset-top)}
+button,input,select{font:inherit;color:inherit}
+svg{display:block}
+.ico{width:30px;height:30px;stroke:var(--ic);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+header{display:flex;align-items:center;justify-content:space-between;height:48px;padding:0 10px;font-size:17px;font-weight:500}
+header button{background:none;border:0;width:40px;height:40px;display:grid;place-items:center}
+header .ico{width:26px;height:26px}
+#msgs{flex:1;overflow-y:auto;padding:8px 14px}
+.empty{margin-top:38vh;text-align:center;color:var(--sub);font-size:14px}
+.time{text-align:center;color:var(--sub);font-size:14px;margin:14px 0 6px}
+.row{display:flex;gap:10px;margin:14px 0;align-items:flex-start}
+.row.me{flex-direction:row-reverse}
+.av{flex:none;width:41px;height:41px;border-radius:4px;background:#ededed center/cover}
+.bub{--bc:var(--them);position:relative;max-width:68%;padding:9px 14px;border-radius:4px;background:var(--bc);font-size:17px;white-space:pre-wrap;word-break:break-word}
+.me .bub{--bc:var(--me);color:#111}
+.bub::before{content:"";position:absolute;top:14px;border:6px solid transparent}
+.them .bub::before{right:100%;border-right-color:var(--bc)}
+.me .bub::before{left:100%;border-left-color:var(--bc)}
+.bub.img{padding:0;background:none}
+.bub.img::before{display:none}
+.bub.img img{display:block;max-width:200px;max-height:300px;border-radius:4px}
+.bub.tfb{--bc:#f79c46;width:230px;max-width:70%;padding:0;color:#fff;overflow:hidden}
+.bub.tfb.done{--bc:#f9d4a5}
+.tt{display:flex;gap:12px;align-items:center;padding:14px 14px 12px}
+.ic{flex:none;width:38px;height:38px;border-radius:50%;border:2px solid #fff;display:grid;place-items:center;font-size:20px}
+.amt{font-size:18px;font-weight:600}
+.nt{font-size:13px;opacity:.95}
+.tb{background:#fff;color:#999;font-size:12px;padding:4px 14px}
+footer{display:flex;gap:10px;align-items:center;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:var(--bar);border-top:1px solid var(--line)}
+footer>button{flex:none;background:none;border:0;padding:0;width:30px;height:30px;position:relative}
+.ibox{flex:1;min-width:0;position:relative;height:40px;background:var(--in);border-radius:5px}
+.ibox input{width:100%;height:100%;border:0;background:none;outline:none;padding:0 70px 0 16px;font-size:17px}
+.ibox input::placeholder{color:var(--ph)}
+.ibox .ico{position:absolute;top:50%;transform:translateY(-50%);width:22px;height:22px;stroke:var(--ph);pointer-events:none}
+#ar{right:42px}#mic{right:10px}
+#badge{position:absolute;right:-5px;bottom:-5px}
+#badge .av{width:16px;height:16px;border-radius:50%;border:2px solid var(--bar)}
+#send{flex:none;height:36px;padding:0 14px;border:0;border-radius:5px;background:#07c160;color:#fff;font-size:15px;display:none}
+#sheet,#modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none}
+#sheet.on{display:flex;align-items:flex-end}
+#modal.on{display:flex;align-items:center;justify-content:center;padding:16px}
+#sheet>div{width:100%;background:var(--bg);padding-bottom:env(safe-area-inset-bottom)}
+#sheet button{display:block;width:100%;height:52px;border:0;border-bottom:1px solid var(--line);background:var(--bar);font-size:17px}
+#sheet .red{color:#fa5151}
+#sheet .gap{margin-top:8px}
+#modal>div{width:100%;max-width:380px;max-height:86dvh;overflow:auto;background:var(--bar);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.mt{font-weight:600;font-size:17px}
+.hint{color:var(--sub);font-size:13px}
+#modal input,#modal select{height:40px;border:1px solid var(--line);border-radius:5px;padding:0 10px;background:var(--in);width:100%}
+.mb{display:flex;gap:10px;justify-content:flex-end}
+.mb button{height:38px;padding:0 18px;border:0;border-radius:5px;background:var(--in)}
+.mb .ok{background:#07c160;color:#fff}
+.cl{display:flex;flex-direction:column;gap:10px}
+.cr{display:flex;gap:10px;align-items:center}
+.cr .av{cursor:pointer}
+.cr button,.add{border:0;background:var(--in);border-radius:5px;height:40px;padding:0 12px}
+</style>
+</head>
+<body>
+<header>
+  <button aria-label="Quay lại"><svg class="ico" viewBox="0 0 24 24"><path d="M15 4.5 7.5 12l7.5 7.5"/></svg></button>
+  <span id="title"></span>
+  <button id="more" aria-label="Tùy chọn"><svg class="ico" viewBox="0 0 24 24" style="fill:var(--ic);stroke:none"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg></button>
+</header>
+<main id="msgs"></main>
+<footer>
+  <button id="who" aria-label="Chọn người gửi"><svg class="ico" viewBox="0 0 30 30"><circle cx="15" cy="15" r="13"/><circle cx="10.5" cy="15" r="1.3" style="fill:var(--ic)"/><path d="M14 12.4a3.6 3.6 0 0 1 0 5.2M17.2 10a7 7 0 0 1 0 10"/></svg><span id="badge"></span></button>
+  <div class="ibox">
+    <input id="inp" placeholder="Nhập tin nhắn" autocomplete="off" enterkeyhint="send">
+    <svg class="ico" id="ar" viewBox="0 0 24 24"><path d="M4 12h15M14 7l5 5-5 5"/></svg>
+    <svg class="ico" id="mic" viewBox="0 0 24 24"><rect x="8.5" y="3" width="7" height="12" rx="3.5"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></svg>
+  </div>
+  <button id="emo" aria-label="Biểu tượng"><svg class="ico" viewBox="0 0 30 30"><circle cx="15" cy="15" r="13"/><circle cx="10.8" cy="12" r="1.2" style="fill:var(--ic)"/><circle cx="19.2" cy="12" r="1.2" style="fill:var(--ic)"/><path d="M9 16.5h12a6 6 0 0 1-12 0z"/></svg></button>
+  <button id="plus" aria-label="Thêm"><svg class="ico" viewBox="0 0 30 30"><circle cx="15" cy="15" r="13"/><path d="M15 8.5v13M8.5 15h13"/></svg></button>
+  <button id="send">Gửi</button>
+</footer>
+<div id="sheet"><div></div></div>
+<div id="modal"><div></div></div>
+<input type="file" id="file" accept="image/*" hidden>
+<script>
+const $=s=>document.querySelector(s),K='chatpwa-v2';
+const div=(c,t)=>{const d=document.createElement('div');d.className=c;if(t!=null)d.textContent=t;return d};
+let S={title:'Bạn thân',who:'me',chars:[{id:'me',name:'Tôi'},{id:'c1',name:'Bạn thân'}],msgs:[]};
+try{const o=JSON.parse(localStorage.getItem(K)||'null');if(o)S=o}catch(e){}
+const save=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){alert('Bộ nhớ đầy. Hãy xóa bớt ảnh hoặc tin nhắn.')}};
+const P=['#576b95','#e6762e','#8a5cf6','#d9534f','#2a9d8f','#b08968'];
+const ch=id=>S.chars.find(c=>c.id===id)||S.chars[0];
+const DEF="url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Ccircle cx='24' cy='18' r='8' fill='%23c4c4c4'/%3E%3Cpath d='M8 46c0-10 7-15 16-15s16 5 16 15z' fill='%23c4c4c4'/%3E%3C/svg%3E\")";
+function av(c){const d=div('av');d.style.backgroundImage=c.av?'url('+c.av+')':DEF;return d}
+const p2=n=>String(n).padStart(2,'0');
+function fmt(t){const n=new Date(),x=new Date(t),h=p2(x.getHours())+':'+p2(x.getMinutes());
+  const d=Math.round((new Date(n.getFullYear(),n.getMonth(),n.getDate())-new Date(x.getFullYear(),x.getMonth(),x.getDate()))/864e5);
+  return d===0?h:d===1?'Hôm qua '+h:p2(x.getDate())+'/'+p2(x.getMonth()+1)+' '+h}
+function money(x){const d=x.cur==='₫',n=d?x.v.toLocaleString('vi-VN',{maximumFractionDigits:0}):x.v.toFixed(2);return d?n+'₫':x.cur+n}
+function render(){
+  $('#title').textContent=S.title;
+  $('#badge').replaceChildren(av(ch(S.who)));
+  const m=$('#msgs');m.replaceChildren();
+  if(!S.msgs.length)m.append(div('empty','Chưa có tin nhắn. Nhập nội dung bên dưới để bắt đầu.'));
+  let last=0;
+  S.msgs.forEach((x,i)=>{
+    if(x.t-last>3e5)m.append(div('time',fmt(x.t)));
+    last=x.t;
+    const r=div('row '+(x.c==='me'?'me':'them')),b=div('bub');
+    if(x.k==='img'){b.classList.add('img');const im=new Image();im.src=x.src;b.append(im)}
+    else if(x.k==='tf'){
+      b.classList.add('tfb');if(x.done)b.classList.add('done');
+      const box=div('');box.append(div('amt',money(x)),div('nt',x.done?'Đã nhận':(x.note||'Chuyển khoản cho bạn')));
+      const tt=div('tt');tt.append(div('ic','⇄'),box);b.append(tt,div('tb','Chuyển khoản'));
+    }else b.textContent=x.m;
+    b.onclick=()=>msgMenu(i);
+    r.append(av(ch(x.c)),b);m.append(r);
+  });
+  m.scrollTop=m.scrollHeight;
+}
+function menu(items){
+  const s=$('#sheet'),box=s.firstElementChild;box.replaceChildren();
+  items.forEach(([t,f,red])=>{const b=document.createElement('button');b.textContent=t;if(red)b.className='red';
+    b.onclick=()=>{s.classList.remove('on');f();save();render()};box.append(b)});
+  const c=document.createElement('button');c.textContent='Hủy';c.className='gap';c.onclick=()=>s.classList.remove('on');
+  box.append(c);s.classList.add('on');
+}
+function modal(t,nodes,ok,onOk){
+  const m=$('#modal'),c=m.firstElementChild,row=div('mb'),x=document.createElement('button');
+  c.replaceChildren(div('mt',t),...nodes);
+  x.textContent=ok?'Hủy':'Xong';x.onclick=()=>m.classList.remove('on');row.append(x);
+  if(ok){const y=document.createElement('button');y.textContent=ok;y.className='ok';
+    y.onclick=()=>{if(onOk()!==false)m.classList.remove('on')};row.append(y)}
+  c.append(row);m.classList.add('on');
+}
+const inp=(ph,mode)=>{const i=document.createElement('input');i.placeholder=ph;if(mode)i.inputMode=mode;return i};
+const sel=o=>{const s=document.createElement('select');o.forEach(v=>s.add(new Option(v,v)));return s};
+function msgMenu(i){
+  const x=S.msgs[i],it=[];
+  if(x.k==='tf')it.push(['Đổi trạng thái (chờ nhận / đã nhận)',()=>{x.done=!x.done}]);
+  it.push(['Xóa tin nhắn',()=>S.msgs.splice(i,1),1]);
+  menu(it);
+}
+function tfForm(){
+  const amt=inp('Số tiền (chỉ nhập số)','decimal'),cur=sel(['¥','₫','$']),note=inp('Lời nhắn (không bắt buộc)'),st=sel(['Chờ nhận','Đã nhận']);
+  modal('Chuyển khoản · '+ch(S.who).name,[amt,cur,note,st],'Gửi',()=>{
+    const v=parseFloat(amt.value.replace(/,/g,'.').replace(/[^\d.]/g,''));
+    if(!(v>=0)){amt.focus();return false}
+    S.msgs.push({k:'tf',c:S.who,v,cur:cur.value,note:note.value.trim(),done:st.value==='Đã nhận',t:Date.now()});
+    save();render();
+  });
+}
+function small(f,max,sq){return new Promise(res=>{
+  const u=URL.createObjectURL(f),im=new Image();
+  im.onload=()=>{let w=im.width,h=im.height,sx=0,sy=0,sw=w,sh=h;
+    if(sq){const s=Math.min(w,h);sx=(w-s)/2;sy=(h-s)/2;sw=sh=s;w=h=Math.min(max,s)}
+    else{const k=Math.min(1,max/Math.max(w,h));w=Math.round(w*k);h=Math.round(h*k)}
+    const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(im,sx,sy,sw,sh,0,0,w,h);
+    URL.revokeObjectURL(u);res(c.toDataURL(f.type==='image/png'?'image/png':'image/jpeg',.82))};
+  im.onerror=()=>res(null);im.src=u})}
+function pick(cb,multi){const f=$('#file');f.multiple=!!multi;f.onchange=()=>{[...f.files].forEach(cb);f.value=''};f.click()}
+function charsUI(){
+  const list=div('cl');
+  const draw=()=>{list.replaceChildren();S.chars.forEach(c=>{
+    const r=div('cr'),a=av(c),n=document.createElement('input');
+    n.value=c.name;n.oninput=()=>{c.name=n.value||'?'};n.onchange=()=>{save();render()};
+    a.onclick=()=>pick(async f=>{const u=await small(f,128,1);if(u){c.av=u;save();draw();render()}});
+    r.append(a,n);
+    if(c.id!=='me'){const d=document.createElement('button');d.textContent='✕';
+      d.onclick=()=>{if(confirm('Xóa '+c.name+' và các tin nhắn của nhân vật này?')){
+        S.msgs=S.msgs.filter(m=>m.c!==c.id);S.chars=S.chars.filter(z=>z!==c);if(S.who===c.id)S.who='me';save();draw();render()}};
+      r.append(d)}
+    list.append(r)})};
+  draw();
+  const add=document.createElement('button');add.textContent='+ Thêm nhân vật';add.className='add';
+  add.onclick=()=>{S.chars.push({id:'c'+Date.now(),name:'Nhân vật '+S.chars.length});save();draw()};
+  modal('Nhân vật',[div('hint','Chạm vào ảnh để đổi ảnh đại diện. Nhân vật đầu tiên là bạn (bên phải).'),list,add]);
+}
+function send(){
+  const v=$('#inp').value.trim();if(!v)return;
+  S.msgs.push({k:'t',c:S.who,m:v,t:Date.now()});
+  $('#inp').value='';tog();save();render();$('#inp').focus();
+}
+function tog(){const on=!!$('#inp').value.trim();$('#send').style.display=on?'block':'none';$('#plus').style.display=on?'none':'';$('#ar').style.display=$('#mic').style.display=on?'none':''}
+$('#send').onclick=send;
+$('#inp').onkeydown=e=>{if(e.key==='Enter')send()};
+$('#inp').oninput=tog;
+$('#emo').onclick=()=>{$('#inp').value+='😊';tog();$('#inp').focus()};
+$('#who').onclick=()=>menu(S.chars.map(c=>['Gửi với vai: '+c.name+(c.id===S.who?' ✓':''),()=>{S.who=c.id}]));
+$('#plus').onclick=()=>menu([
+  ['Gửi ảnh',()=>pick(async f=>{const u=await small(f,800);
+    if(!u)return alert('Không đọc được ảnh này. Hãy dùng PNG hoặc JPEG.');
+    S.msgs.push({k:'img',c:S.who,src:u,t:Date.now()});save();render()},1)],
+  ['Chuyển khoản',tfForm]]);
+$('#more').onclick=()=>menu([
+  ['Quản lý nhân vật',charsUI],
+  ['Đổi tên cuộc trò chuyện',()=>{const n=prompt('Tên hiển thị trên đầu:',S.title);if(n&&n.trim())S.title=n.trim()}],
+  ['Xóa toàn bộ tin nhắn',()=>{if(confirm('Xóa toàn bộ tin nhắn?'))S.msgs=[]},1]]);
+$('#modal').onclick=e=>{if(e.target.id==='modal')e.target.classList.remove('on')};
+render();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
